@@ -2,7 +2,7 @@ from django.db import models
 from django.core.validators import validate_image_file_extension, MinValueValidator, MaxValueValidator
 from django.utils import timezone
 
-from autoslug import AutoSlugField
+from slugify import slugify
 
 from users.models import CustomUser
 
@@ -15,19 +15,17 @@ class Category(models.Model):
     title = models.CharField(
         "название",
         max_length=99,
-        unique=True  # чтобы названия не повторялись
-    )
-    slug = AutoSlugField(
-        "слаг",
-        populate_from="title",
         unique=True,
-        editable=True,      # можно редактировать вручную
-        always_update=True, # автоматически обновляется при изменении title
-        blank=True,
     )
+    slug = models.SlugField(max_length=120, unique=True)
+
+    def save(self, *args, **kwargs):  
+        if not self.slug:  
+            self.slug = slugify(self.title)  
+        super().save(*args, **kwargs)  
 
     def __str__(self):
-        return self.title
+        return "%s (%s)" % (self.title, self.slug)
     
     class Meta:
         verbose_name = "категория"

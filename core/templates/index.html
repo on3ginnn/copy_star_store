@@ -5,4 +5,16 @@
 
 <h1>Homepage. WHats Up!</h1>
 {{ user }}
+<a href="{% url 'store:homepage' %}">Главная</a>
+<a href="{% url 'store:catalog' %}">Каталог</a>
+{% if user.is_authenticated  %}
+    {% if user.is_superuser or user.is_staff  %}
+    <a href="{% url 'store:admin-dashboard' %}" class="admin-link">Админка</a>
+    {% endif %}
+    <a href="{% url 'account:logout' %}">Выйти</a>
+{% else %}
+    <a href="{% url 'account:login' %}">Войти</a>
+    <a href="{% url 'account:register' %}">Зарегистрироваться</a>
+{% endif %}
+
 {% endblock %}

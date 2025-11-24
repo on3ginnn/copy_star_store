@@ -1,5 +1,6 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.generic import TemplateView, ListView, DetailView, CreateView
+from django.urls import reverse_lazy
 
 from .models import Product, Category, Basket
 from .forms import ProductCreateForm, CategoryCreateForm
@@ -25,12 +26,14 @@ class StoreAdminProductCreateView(CreateView):
     model = Product
     template_name = 'admin/product_create.html'
     form_class = ProductCreateForm
+    success_url = reverse_lazy("store:admin-dashboard")
 
 
 class StoreAdminCategoryCreateView(CreateView):
     model = Category
     template_name = 'admin/category_create.html'
     form_class = CategoryCreateForm
+    success_url = reverse_lazy("store:admin-dashboard")
 
 
 class StoreAdminDashboardView(TemplateView):

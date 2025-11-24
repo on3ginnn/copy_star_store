@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+
+{% block content %}
+
+<h1>Admin Dashboard.</h1>
+<a href="{% url 'store:admin-category' %}">Добавить категорию</a>
+<a href="{% url 'store:admin-product' %}">Добавить товар</a>
+{{ user }}
+{% endblock %}

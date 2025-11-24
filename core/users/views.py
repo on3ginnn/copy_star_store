@@ -28,7 +28,7 @@ class UserLoginView(LoginView):
     
     def get_success_url(self):
         if self.request.user.is_staff or self.request.user.is_superuser:
-            return reverse_lazy('store:admin')
+            return reverse_lazy('store:admin-dashboard')
         return self.success_url
     
 
