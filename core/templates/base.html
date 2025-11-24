@@ -1,4 +1,4 @@
-{% load django_bootstrap5 %}
+{% load django_bootstrap5 static %}
 
 <!DOCTYPE html>
 <html lang="ru">
@@ -8,10 +8,15 @@
     {% bootstrap_css %}
     <title>Copy Star</title>
 </head>
-<body>
-    
+<body class="d-flex flex-column min-vh-100">
+
+    {% include 'includes/header.html' %}
+
+    <main class="container py-5 flex-grow-1">
     {% block content %}
     {% endblock %}
+    </main>
+
 
     {% bootstrap_javascript %}
 </body>

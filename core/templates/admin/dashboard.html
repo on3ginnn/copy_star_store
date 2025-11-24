@@ -3,8 +3,19 @@
 
 {% block content %}
 
-<h1>Admin Dashboard.</h1>
-<a href="{% url 'store:admin-category' %}">Добавить категорию</a>
-<a href="{% url 'store:admin-product' %}">Добавить товар</a>
-{{ user }}
+<div class="row justify-content-center">
+    <div class="col-6">
+        <div class="card p-3">
+            <h2 class="card-title">Админ панель</h2>
+            <h6 class="card-subtitle mb-2 text-muted">Доступна только администратору</h6>
+            <div class="card-body p-0 pt-3">
+                <div class="btn-group-vertical">
+                    <a class="btn btn-outline-dark" href="{% url 'store:admin-category' %}">Добавить категорию</a>
+                    <a class="btn btn-outline-dark" href="{% url 'store:admin-product' %}">Добавить товар</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

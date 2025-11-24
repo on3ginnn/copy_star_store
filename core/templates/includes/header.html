@@ -1,0 +1,34 @@
+<nav class="navbar">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'store:homepage' %}">
+            <span class="ms-2">Copy Star</span>
+        </a>
+        <ul class="navbar-nav flex-row gap-4">
+            <li class="nav-item">
+                <a href="{% url 'store:homepage' %}" class="nav-link">Главная</a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'store:catalog' %}" class="nav-link">Каталог</a>
+            </li>
+
+            {% if user.is_authenticated  %}
+                {% if user.is_superuser or user.is_staff  %}
+                    <li class="nav-item">
+                        <a href="{% url 'store:admin-dashboard' %}" class="nav-link">Админка</a>
+                    </li>
+                {% endif %}
+                <li class="nav-item">
+                    <a href="{% url 'account:logout' %}" class="nav-link text-danger">Выйти</a>
+                </li>
+            {% else %}
+                <li class="nav-item">
+                    <a href="{% url 'account:login' %}" class="nav-link">Войти</a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'account:register' %}" class="nav-link">Зарегистрироваться</a>
+                </li>
+            {% endif %}
+        </ul>
+        <strong>{{ user.username }}</strong>
+    </div>
+</nav>

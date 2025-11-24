@@ -3,15 +3,20 @@
 
 {% block content %}
 
-<form method="post">
-    {% csrf_token %}
-    <div class="mb-3">
-        {{ form.title.label_tag }}
-        {{ form.title }}
-        {{ form.title.errors }}
+<div class="row justify-content-center">
+    <div class="col-6">
+        <div class="card p-3">
+            <h2 class="card-title">Добавление категории</h2>
+            <div class="card-body p-0 pt-2">
+            <form method="post">
+                {% csrf_token %}
+                {% bootstrap_form form %}
+                {% bootstrap_button "Сохранить" button_type="submit" button_class='btn-primary' %}
+                
+            </form>
+            </div>
+        </div>
     </div>
-    {% bootstrap_button "Сохранить" button_type="submit" button_class='btn-primary' %}
-    
-</form>
+</div>
 
 {% endblock %}

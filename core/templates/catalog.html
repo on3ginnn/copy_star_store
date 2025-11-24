@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load static %}
+{% load django_bootstrap5 %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+    {% for product in products %}
+    <div class="col-12 col-md-4 col-sm-6 col-lg-3">
+        <div class="card p-3 h-100">
+            <div style="
+                width: 100%;
+                overflow: hidden;
+            ">
+                <img src="{{ product.image.url }}"
+                    alt="{{ product.title }}"
+                    style="width:100%; height:100%; object-fit: cover;">
+            </div>
+            <div class="card-body p-0 pt-3">
+                <h4 class="card-title">{{ product.title }}</h4>
+                <h6 class="card-subtitle mb-2 text-muted">Модель: {{ product.model }}</h6>
+                <a class="btn btn-primary" href="{% url 'store:detail' product.pk %}">Подробнее</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}
