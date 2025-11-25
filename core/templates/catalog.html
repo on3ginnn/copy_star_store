@@ -4,26 +4,53 @@
 
 {% block content %}
 
-<div class="row justify-content-center">
+<div class="row justify-content-start">
+    <div class="btn-group d-block mb-3">
+        <a class="btn btn-primary {% if not request.GET.filter_by %}active{% endif %}" href="{% url 'store:catalog' %}{% if request.GET.category_slug %}?category_slug={{ request.GET.category_slug }}{% endif %}">По новизне</a>
+        <a class="btn btn-primary {% if request.GET.filter_by == 'year' %}active{% endif %}" href="{% url 'store:catalog' %}?filter_by=year{% if request.GET.category_slug %}&category_slug={{ request.GET.category_slug }}{% endif %}">По году производства</a>
+        <a class="btn btn-primary {% if request.GET.filter_by == 'title' %}active{% endif %}" href="{% url 'store:catalog' %}?filter_by=title{% if request.GET.category_slug %}&category_slug={{ request.GET.category_slug }}{% endif %}">По названию</a>
+        <a class="btn btn-primary {% if request.GET.filter_by == 'price' %}active{% endif %}" href="{% url 'store:catalog' %}?filter_by=price{% if request.GET.category_slug %}&category_slug={{ request.GET.category_slug }}{% endif %}">По цене</a>
+    </div>
+    <div class="btn-group d-block mb-3">
+        <a class="btn btn-primary {% if request.GET.category_slug == category.slug %}active{% endif %}" href="{% url 'store:catalog' %}{% if request.GET.filter_by %}?filter_by={{ request.GET.filter_by }}{% endif %}">Все</a>
+        {% for category in categories %}
+        <a class="btn btn-primary {% if request.GET.category_slug == category.slug %}active{% endif %}" href="{% url 'store:catalog' %}?category_slug={{ category.slug }}{% if request.GET.filter_by %}&filter_by={{ request.GET.filter_by }}{% endif %}">{{ category.title }}</a>
+        {% endfor %}
+    </div>
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
     {% for product in products %}
-    <div class="col-12 col-md-4 col-sm-6 col-lg-3">
-        <div class="card p-3 h-100">
-            <div style="
-                width: 100%;
-                overflow: hidden;
-            ">
+
+        <div class="">
+            <div class="card p-3 h-100">
+
                 <img src="{{ product.image.url }}"
                     alt="{{ product.title }}"
-                    style="width:100%; height:100%; object-fit: cover;">
-            </div>
-            <div class="card-body p-0 pt-3">
-                <h4 class="card-title">{{ product.title }}</h4>
-                <h6 class="card-subtitle mb-2 text-muted">Модель: {{ product.model }}</h6>
-                <a class="btn btn-primary" href="{% url 'store:detail' product.pk %}">Подробнее</a>
+                    style="width:100%; height:100%; object-fit: cover;"
+                    class="card-img-top">
+                <div class="card-body p-0 pt-3">
+                    <h4 class="card-title">{{ product.title }}</h4>
+                    <h6 class="card-subtitle mb-2 text-muted">Модель: {{ product.model }}</h6>
+                    <div class="col-6">
+                        <small class="text-muted">Страна</small>
+                        <div class="fw-semibold">{{ product.production_country }}</div>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted">Год выпуска</small>
+                        <div class="fw-bold">{{ product.year_of_production }}</div>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted">Цена</small>
+                        <div class="fw-bold text-success fs-4">{{ product.price }} ₽</div>
+                    </div>
+                    <a class="btn btn-primary w-100" href="{% url 'store:detail' product.pk %}">Подробнее</a>
+                </div>
+
             </div>
         </div>
-    </div>
     {% endfor %}
+    </div>
+
 </div>
 
 {% endblock %}

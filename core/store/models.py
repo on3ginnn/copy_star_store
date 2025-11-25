@@ -30,6 +30,7 @@ class Category(models.Model):
     class Meta:
         verbose_name = "категория"
         verbose_name_plural = "категории"
+        ordering = ['title']
 
 
 class Product(models.Model):
@@ -59,7 +60,7 @@ class Product(models.Model):
         null=True,
     )
     production_country = models.CharField(
-        "страна производства",
+        "страна производитель",
         max_length=100,
         blank=True,
     )
@@ -89,7 +90,7 @@ class Product(models.Model):
 
     def __str__(self):
         return self.title
-    
+
 
 class Basket(models.Model):
     user = models.ForeignKey(

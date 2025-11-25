@@ -18,6 +18,9 @@
                     </li>
                 {% endif %}
                 <li class="nav-item">
+                    <a href="{% url 'store:basket' %}" class="nav-link">Корзина</a>
+                </li>
+                <li class="nav-item">
                     <a href="{% url 'account:logout' %}" class="nav-link text-danger">Выйти</a>
                 </li>
             {% else %}
