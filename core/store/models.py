@@ -126,3 +126,79 @@ class Basket(models.Model):
     
     def get_total_price(self):
         return self.quantity * self.product.price
+
+
+class Order(models.Model):
+    class Status(models.TextChoices):
+        NEW = "new", "Новый"
+        CONFIRMED = "confirmed", "Подтверждён"
+        CANCELLED = "cancelled", "Отменён"
+
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name="orders",
+        verbose_name="пользователь",
+    )
+    status = models.CharField(
+        "статус",
+        max_length=20,
+        choices=Status.choices,
+        default=Status.NEW,
+    )
+    cancelled_reason = models.CharField(
+        "причина отмены",
+        max_length=255,
+        blank=True,
+    )
+    created_at = models.DateTimeField(
+        "дата создания",
+        auto_now_add=True,
+    )
+
+    class Meta:
+        verbose_name = "заказ"
+        verbose_name_plural = "заказы"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Заказ #{self.id} от {self.user.username} ({self.get_status_display()})"
+
+    def get_items_count(self):
+        return sum(item.quantity for item in self.items.all())
+
+    def get_total_price(self):
+        return sum(item.get_total_price() for item in self.items.all())
+
+    def restore_stock(self):
+        for item in self.items.select_related("product"):
+            product = item.product
+            product.count_available += item.quantity
+            product.save(update_fields=["count_available"])
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        related_name="items",
+        verbose_name="заказ",
+    )
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.PROTECT,
+        related_name="order_items",
+        verbose_name="товар",
+    )
+    quantity = models.PositiveIntegerField("количество", validators=[MinValueValidator(1)])
+    price = models.PositiveIntegerField("цена за единицу", validators=[MinValueValidator(0)])
+
+    class Meta:
+        verbose_name = "позиция заказа"
+        verbose_name_plural = "позиции заказа"
+
+    def __str__(self):
+        return f"{self.product.title} x {self.quantity}"
+
+    def get_total_price(self):
+        return self.quantity * self.price

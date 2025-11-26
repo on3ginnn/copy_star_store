@@ -1,13 +1,21 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import TemplateView, ListView, DetailView, CreateView, RedirectView
+from django.views.generic import TemplateView, ListView, DetailView, CreateView, RedirectView, FormView
 from django.urls import reverse_lazy
+from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
+from django.contrib.auth import authenticate
+from django.http import JsonResponse, HttpResponseForbidden
 
-from .models import Product, Category, Basket
+from .models import Product, Category, Basket, Order, OrderItem
 from .forms import ProductCreateForm, CategoryCreateForm
 
 
 class StoreHomepageView(TemplateView):
     template_name = "index.html"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["products"] = Product.objects.order_by("-created_at")[:5]
+        return ctx
 
 
 class StoreCatalogView(ListView):
@@ -57,22 +65,37 @@ class StoreProductDetailView(DetailView):
     context_object_name = "product"
 
 
-class StoreAdminProductCreateView(CreateView):
+
+class StoreAdminProductCreateView(UserPassesTestMixin, CreateView):
     model = Product
     template_name = 'admin/product_create.html'
     form_class = ProductCreateForm
     success_url = reverse_lazy("store:admin-dashboard")
+    login_url = reverse_lazy('account:login')
+
+    def test_func(self):
+        return self.request.user.is_superuser or self.request.user.is_staff
 
 
-class StoreAdminCategoryCreateView(CreateView):
+
+class StoreAdminCategoryCreateView(UserPassesTestMixin, CreateView):
     model = Category
     template_name = 'admin/category_create.html'
     form_class = CategoryCreateForm
     success_url = reverse_lazy("store:admin-dashboard")
+    login_url = reverse_lazy('account:login')
+
+    def test_func(self):
+        return self.request.user.is_superuser or self.request.user.is_staff
 
 
-class StoreAdminDashboardView(TemplateView):
+
+class StoreAdminDashboardView(UserPassesTestMixin, TemplateView):
     template_name = "admin/dashboard.html"
+    login_url = reverse_lazy('account:login')
+
+    def test_func(self):
+        return self.request.user.is_superuser or self.request.user.is_staff
 
 
 class StoreBasketAddProductView(RedirectView):
@@ -129,17 +152,143 @@ class StoreBasketView(ListView):
     context_object_name = 'basket_items'
     
     def get_queryset(self):
-        return Basket.objects.filter(user=self.request.user)
+        return Basket.objects.filter(user=self.request.user).select_related('product')
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        items = ctx['basket_items']
+        ctx['total_items'] = sum(item.quantity for item in items)
+        ctx['total_price'] = sum(item.get_total_price() for item in items)
+        return ctx
     
 
-class StoreAdminProductDeleteView(RedirectView):
+
+class StoreAdminProductDeleteView(UserPassesTestMixin, RedirectView):
     url = reverse_lazy("store:catalog")
+    login_url = reverse_lazy('account:login')
+
+    def test_func(self):
+        return self.request.user.is_superuser or self.request.user.is_staff
 
     def get(self, request, *args, **kwargs):
-
         product_id = kwargs.get('pk')
         product = get_object_or_404(Product, pk=product_id)
-
         product.delete()
-
         return super().get(request, *args, **kwargs)
+
+
+class ContactsView(TemplateView):
+    template_name = "contacts.html"
+
+
+class CheckoutFormView(LoginRequiredMixin, TemplateView):
+    template_name = "orders/checkout.html"
+    success_url = reverse_lazy("store:orders")
+
+    def get(self, request, *args, **kwargs):
+        basket_qs = Basket.objects.filter(user=request.user)
+        if not basket_qs.exists():
+            return redirect("store:basket")
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        password = request.POST.get("password", "")
+        user = authenticate(username=request.user.username, password=password)
+        if not user:
+            if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                return JsonResponse({"ok": False, "error": "Неверный пароль"}, status=400)
+            context = {"error": "Неверный пароль"}
+            return render(request, self.template_name, context, status=400)
+
+        basket_items = Basket.objects.filter(user=request.user)
+        if not basket_items.exists():
+            if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                return JsonResponse({"ok": False, "error": "Корзина пуста"}, status=400)
+            return redirect("store:basket")
+
+        order = Order.objects.create(user=request.user)
+        for item in basket_items:
+            OrderItem.objects.create(
+                order=order,
+                product=item.product,
+                quantity=item.quantity,
+                price=item.product.price,
+            )
+        basket_items.delete()
+
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse({"ok": True, "redirect": str(self.success_url)})
+
+        return redirect(self.success_url)
+
+
+class MyOrdersListView(LoginRequiredMixin, ListView):
+    template_name = "orders/my_orders.html"
+    context_object_name = "orders"
+
+    def get_queryset(self):
+        return Order.objects.filter(user=self.request.user).order_by("-created_at")
+
+
+class MyOrderDeleteView(LoginRequiredMixin, RedirectView):
+    url = reverse_lazy("store:orders")
+
+    def post(self, request, *args, **kwargs):
+        order = get_object_or_404(Order, pk=kwargs.get("pk"), user=request.user)
+        if order.status == Order.Status.NEW:
+            order.restore_stock()
+            order.delete()
+            return super().get(request, *args, **kwargs)
+        return HttpResponseForbidden("Нельзя удалить заказ со статусом не 'Новый'")
+
+
+class AdminOrdersListView(UserPassesTestMixin, ListView):
+    template_name = "admin/orders_list.html"
+    context_object_name = "orders"
+
+    def test_func(self):
+        return self.request.user.is_superuser or self.request.user.is_staff
+
+    def get_queryset(self):
+        qs = Order.objects.select_related("user").prefetch_related("items")
+        status = self.request.GET.get("status")
+        if status in {s.value for s in Order.Status}:
+            qs = qs.filter(status=status)
+        return qs.order_by("-created_at")
+
+
+class AdminOrderConfirmView(UserPassesTestMixin, RedirectView):
+    url = reverse_lazy("store:admin-orders")
+
+    def test_func(self):
+        return self.request.user.is_superuser or self.request.user.is_staff
+
+    def post(self, request, *args, **kwargs):
+        order = get_object_or_404(Order, pk=kwargs.get("pk"))
+        order.status = Order.Status.CONFIRMED
+        order.cancelled_reason = ""
+        order.save()
+        return super().get(request, *args, **kwargs)
+
+
+class AdminOrderCancelView(UserPassesTestMixin, TemplateView):
+    template_name = "admin/order_cancel.html"
+    success_url = reverse_lazy("store:admin-orders")
+
+    def test_func(self):
+        return self.request.user.is_superuser or self.request.user.is_staff
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["order"] = get_object_or_404(Order, pk=self.kwargs.get("pk"))
+        return ctx
+
+    def post(self, request, *args, **kwargs):
+        order = get_object_or_404(Order, pk=kwargs.get("pk"))
+        reason = request.POST.get("reason", "").strip()
+        if order.status != Order.Status.CANCELLED:
+            order.restore_stock()
+        order.status = Order.Status.CANCELLED
+        order.cancelled_reason = reason[:255]
+        order.save()
+        return redirect(self.success_url)

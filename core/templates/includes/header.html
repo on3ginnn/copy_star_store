@@ -5,10 +5,13 @@
         </a>
         <ul class="navbar-nav flex-row gap-4">
             <li class="nav-item">
-                <a href="{% url 'store:homepage' %}" class="nav-link">Главная</a>
+                <a href="{% url 'store:homepage' %}" class="nav-link">О нас</a>
             </li>
             <li class="nav-item">
                 <a href="{% url 'store:catalog' %}" class="nav-link">Каталог</a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'store:contacts' %}" class="nav-link">Где нас найти?</a>
             </li>
 
             {% if user.is_authenticated  %}
@@ -19,6 +22,9 @@
                 {% endif %}
                 <li class="nav-item">
                     <a href="{% url 'store:basket' %}" class="nav-link">Корзина</a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'store:orders' %}" class="nav-link">Мои заказы</a>
                 </li>
                 <li class="nav-item">
                     <a href="{% url 'account:logout' %}" class="nav-link text-danger">Выйти</a>

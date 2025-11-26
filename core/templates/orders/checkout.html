@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-6">
+    <div class="card p-3">
+      <h3 class="card-title">Оформление заказа</h3>
+      <div class="card-body p-0 pt-2">
+        {% if error %}
+          <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+        <form id="checkout-form" method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label">Введите пароль для подтверждения</label>
+            <input type="password" class="form-control" name="password" required>
+          </div>
+          <button class="btn btn-primary" type="submit">Сформировать заказ</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script>
+    const form = document.getElementById('checkout-form');
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const resp = await fetch('', {method: 'POST', headers: {'X-Requested-With': 'XMLHttpRequest'}, body: formData});
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data.redirect) { window.location.href = data.redirect; }
+      } else {
+        const data = await resp.json();
+        alert(data.error || 'Ошибка оформления заказа');
+      }
+    });
+  </script>
+</div>
+{% endblock %}

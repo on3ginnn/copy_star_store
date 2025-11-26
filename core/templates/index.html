@@ -1,8 +1,193 @@
 {% extends "base.html" %}
+{% load static %}
 {% load django_bootstrap5 %}
 
 {% block content %}
+<style>
+	.hero-copy-star {
+		background: radial-gradient(circle at top right, #fdf5ff, #eef5ff 45%, #ffffff);
+		border-radius: 32px;
+		padding: 3rem;
+		box-shadow: 0 20px 60px rgba(25, 42, 109, 0.08);
+	}
+	.hero-badge {
+		padding: .35rem .9rem;
+		border-radius: 999px;
+		font-size: .85rem;
+		font-weight: 600;
+		background: rgba(111, 66, 193, .1);
+		color: #6f42c1;
+		display: inline-flex;
+		align-items: center;
+		gap: .35rem;
+	}
+	.icon-pill {
+		width: 48px;
+		height: 48px;
+		border-radius: 14px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		background: rgba(13, 110, 253, .08);
+		color: #0d6efd;
+		font-size: 1.25rem;
+	}
+</style>
 
-<h1>Homepage. WHats Up!</h1>
+<section class="container py-4 py-lg-5">
+	<div class="hero-copy-star">
+		<div class="row align-items-center gy-4">
+			<div class="col-lg-6 text-center text-lg-start">
+				<div class="hero-badge mb-3">
+					<span class="icon-pill">★</span>
+					Copy Star — эксперты по печати
+				</div>
+				<h1 class="display-5 fw-bold">Техника, которая работает безотказно и экономит ваше время</h1>
+				<p class="lead text-muted">Подберём копировальное оборудование для офиса, точки выдачи или производства. Тестируем каждую модель, даём гарантию и полный сервис.</p>
+				<div class="d-flex flex-column flex-sm-row gap-3 mt-4">
+					<a href="{% url 'store:catalog' %}" class="btn btn-primary btn-lg px-4">Перейти в каталог</a>
+					<a href="{% url 'store:contacts' %}" class="btn btn-outline-secondary btn-lg px-4">Получить консультацию</a>
+				</div>
+				<div class="d-flex flex-wrap gap-4 mt-4 text-muted small">
+					<div>
+						<div class="fw-bold fs-4 text-dark">500+</div>
+						офисов подключили за год
+					</div>
+					<div>
+						<div class="fw-bold fs-4 text-dark">24/7</div>
+						поддержка и обслуживание
+					</div>
+					<div>
+						<div class="fw-bold fs-4 text-dark">30 дней</div>
+						тест-драйв без риска
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-5 offset-lg-1">
+				<div class="card border-0 shadow-sm p-3 p-md-4">
+					<div class="d-flex align-items-center mb-3">
+						<img src="{% static 'img/logo.png' %}" alt="Copy Star" style="height:48px" onerror="this.style.display='none'">
+						<div class="ms-3">
+							<strong>Copy Star Care</strong>
+							<div class="text-muted small">персональный подбор и сервис</div>
+						</div>
+					</div>
+					<ul class="list-unstyled mb-0">
+						<li class="d-flex gap-3 mb-3">
+							<span class="icon-pill">⚙️</span>
+							<div>
+								<strong>Комплексное сопровождение</strong>
+								<div class="text-muted">Доставим, настроим и научим команду работать с техникой.</div>
+							</div>
+						</li>
+						<li class="d-flex gap-3 mb-3">
+							<span class="icon-pill">💰</span>
+							<div>
+								<strong>Прозрачные условия</strong>
+								<div class="text-muted">Фиксированные цены, честные гарантии и спецусловия для бизнеса.</div>
+							</div>
+						</li>
+						<li class="d-flex gap-3">
+							<span class="icon-pill">🚀</span>
+							<div>
+								<strong>Быстрый запуск</strong>
+								<div class="text-muted">Среднее время внедрения — 48 часов от заявки до первого отпечатка.</div>
+							</div>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
 
+<section class="bg-light py-5">
+	<div class="container">
+		<div class="text-center mb-4">
+			<p class="text-uppercase text-muted small mb-1">Почему Copy Star</p>
+			<h2 class="fw-bold">Дружелюбный сервис и техника, которой можно доверять</h2>
+		</div>
+		<div class="row g-4">
+			{% for feature in "Надёжная диагностика|Каждое устройство проходит чек-лист перед отправкой;"|add:"Экономия расходников|Подбираем модели под ваш объём печати и бюджет;"|add:"Гибкие сценарии|Лазерные, струйные и термопринтеры для любых задач;"|cut:'"'|slice:":3" %}{% endfor %}
+			<div class="col-md-4">
+				<div class="card h-100 border-0 shadow-sm">
+					<div class="card-body">
+						<div class="icon-pill mb-3">🛠️</div>
+						<h5 class="card-title">Надёжная диагностика</h5>
+						<p class="card-text text-muted">Каждое устройство проходит чек-лист инженеров перед отправкой клиенту.</p>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="card h-100 border-0 shadow-sm">
+					<div class="card-body">
+						<div class="icon-pill mb-3">💡</div>
+						<h5 class="card-title">Экономия расходников</h5>
+						<p class="card-text text-muted">Подбираем модели под ваш объём печати и бюджет, заранее просчитывая обслуживание.</p>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="card h-100 border-0 shadow-sm">
+					<div class="card-body">
+						<div class="icon-pill mb-3">📦</div>
+						<h5 class="card-title">Гибкие сценарии</h5>
+						<p class="card-text text-muted">Лазерные, струйные и термопринтеры для офисов, торговых сетей и event-площадок.</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+
+<section class="container py-5">
+	<div class="row gy-4 align-items-center">
+		<div class="col-lg-5">
+			<p class="text-uppercase text-muted small mb-1">Новинки компании</p>
+			<h2 class="fw-bold">Только проверенные модели</h2>
+			<p class="text-muted">Мы постоянно пополняем каталог и следим, чтобы вся техника была в наличии. Посмотрите подборку самых свежих устройств.</p>
+			<a class="btn btn-outline-primary" href="{% url 'store:catalog' %}">Смотреть весь каталог</a>
+		</div>
+		<div class="col-lg-7">
+			<div id="carouselNew" class="carousel slide shadow-sm rounded" data-bs-ride="carousel">
+				<div class="carousel-inner">
+					{% for p in products|slice:":5" %}
+					<div class="carousel-item {% if forloop.first %}active{% endif %}">
+						<div class="d-flex flex-column flex-md-row align-items-center p-4 gap-4">
+							<img src="{{ p.image.url }}" class="img-fluid" style="max-height:260px; object-fit:contain" alt="{{ p.title }}">
+							<div class="text-center text-md-start">
+								<h5>{{ p.title }}</h5>
+								<p class="text-muted mb-2">{{ p.model }} • {{ p.production_country }}</p>
+								<div class="fw-bold fs-4 text-success">{{ p.price }} ₽</div>
+								<a href="{% url 'store:detail' p.id %}" class="btn btn-primary mt-3">Подробнее</a>
+							</div>
+						</div>
+					</div>
+					{% empty %}
+					<div class="text-muted p-4">Нет товаров для показа</div>
+					{% endfor %}
+				</div>
+				<button class="carousel-control-prev" type="button" data-bs-target="#carouselNew" data-bs-slide="prev">
+					<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+					<span class="visually-hidden">Предыдущий</span>
+				</button>
+				<button class="carousel-control-next" type="button" data-bs-target="#carouselNew" data-bs-slide="next">
+					<span class="carousel-control-next-icon" aria-hidden="true"></span>
+					<span class="visually-hidden">Следующий</span>
+				</button>
+			</div>
+		</div>
+	</div>
+</section>
+
+<section class="py-5 bg-primary text-white">
+	<div class="container text-center">
+		<h2 class="fw-bold mb-3">Готовы подобрать идеальную технику?</h2>
+		<p class="lead mb-4">Напишите нам, расскажем о лучших моделях под ваши задачи и подготовим персональное предложение.</p>
+		<div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+			<a class="btn btn-light btn-lg" href="{% url 'store:catalog' %}">Выбрать принтер</a>
+			<a class="btn btn-outline-light btn-lg" href="{% url 'store:contacts' %}">Связаться с менеджером</a>
+		</div>
+	</div>
+</section>
 {% endblock %}

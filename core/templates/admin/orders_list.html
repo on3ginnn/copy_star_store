@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-10">
+    <div class="card p-3">
+      <h3 class="card-title">Все заказы</h3>
+      <div class="mb-2">
+        <div class="btn-group">
+          <a class="btn btn-outline-secondary {% if not request.GET.status %}active{% endif %}" href="{% url 'store:admin-orders' %}">Все</a>
+          <a class="btn btn-outline-secondary {% if request.GET.status == 'new' %}active{% endif %}" href="{% url 'store:admin-orders' %}?status=new">Новые</a>
+          <a class="btn btn-outline-secondary {% if request.GET.status == 'confirmed' %}active{% endif %}" href="{% url 'store:admin-orders' %}?status=confirmed">Подтверждённые</a>
+          <a class="btn btn-outline-secondary {% if request.GET.status == 'cancelled' %}active{% endif %}" href="{% url 'store:admin-orders' %}?status=cancelled">Отменённые</a>
+        </div>
+      </div>
+      <div class="card-body p-0 pt-2">
+        {% for order in orders %}
+          <div class="border rounded p-2 mb-2">
+            <div class="d-flex justify-content-between">
+              <div>
+                <div class="fw-bold">#{{ order.id }} — {{ order.get_status_display }}</div>
+                <div class="small text-muted">{{ order.created_at|date:"d.m.Y H:i" }} • {{ order.user.surname }} {{ order.user.name }} {{ order.user.patronymic }} • Товаров: {{ order.get_items_count }}</div>
+                {% if order.status == 'cancelled' and order.cancelled_reason %}
+                  <div class="text-danger small">Причина отмены: {{ order.cancelled_reason }}</div>
+                {% endif %}
+              </div>
+              <div class="d-flex gap-1">
+                {% if order.status == 'new' %}
+                <form method="post" action="{% url 'store:admin-order-confirm' order.id %}">
+                  {% csrf_token %}
+                  <button class="btn btn-success btn-sm" type="submit">Подтвердить</button>
+                </form>
+                <a class="btn btn-outline-danger btn-sm" href="{% url 'store:admin-order-cancel' order.id %}">Отменить</a>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        {% empty %}
+          <div class="text-muted">Нет заказов</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

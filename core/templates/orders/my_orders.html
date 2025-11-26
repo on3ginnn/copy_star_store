@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-10">
+    <div class="card p-3">
+      <h3 class="card-title">Мои заказы</h3>
+      <div class="card-body p-0 pt-2">
+        {% if not orders %}
+          <div class="text-muted">Заказов пока нет</div>
+        {% endif %}
+        {% for order in orders %}
+          <div class="border rounded p-2 mb-2 d-flex justify-content-between align-items-center">
+            <div>
+              <div class="fw-bold">Заказ #{{ order.id }} — {{ order.get_status_display }}</div>
+              <div class="small text-muted">{{ order.created_at|date:"d.m.Y H:i" }} • Товаров: {{ order.get_items_count }} • Сумма: {{ order.get_total_price }} ₽</div>
+              {% if order.status == 'cancelled' and order.cancelled_reason %}
+                <div class="text-danger small">Причина отмены: {{ order.cancelled_reason }}</div>
+              {% endif %}
+            </div>
+            {% if order.status == 'new' %}
+            <form method="post" action="{% url 'store:order-delete' order.id %}">
+              {% csrf_token %}
+              <button class="btn btn-outline-danger btn-sm" type="submit">Удалить</button>
+            </form>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
